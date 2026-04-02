@@ -9,15 +9,22 @@ type SegmentedToggleProps<T extends string> = {
   value: T
   onChange: (next: T) => void
   options: readonly SegmentedOption<T>[]
+  className?: string
 }
 
 export function SegmentedToggle<T extends string>({
   value,
   onChange,
   options,
+  className,
 }: SegmentedToggleProps<T>) {
   return (
-    <div className="mb-6 flex w-fit items-center gap-1 rounded-full border border-outline-variant/10 bg-surface-container-low p-1">
+    <div
+      className={cn(
+        "mb-6 flex w-fit items-center gap-1 rounded-full border border-outline-variant/10 bg-surface-container-low p-1",
+        className,
+      )}
+    >
       {options.map((opt) => {
         const selected = value === opt.id
         return (
