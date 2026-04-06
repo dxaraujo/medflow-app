@@ -1,13 +1,14 @@
 import { PacienteDetalheHero } from "@/components/pacientes/detalhe/paciente-detalhe-hero"
-import { PacienteDetalhePainel } from "@/components/pacientes/detalhe/paciente-detalhe-painel"
+import type { PatientDetailOutletContext } from "@/components/pacientes/detalhe/paciente-detalhe-tab-routes"
 import { PacienteDetalheTablist } from "@/components/pacientes/detalhe/paciente-detalhe-tablist"
-import { getPatientDetailById, type PatientDetailTabId } from "@/data/patient-detail-mock"
-import { useMemo, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { getPatientDetailById } from "@/data/patient-detail-mock"
+import { useMemo } from "react"
+import { Link, Outlet, useLocation, useParams } from "react-router-dom"
 
-export function PacienteDetalhePage() {
+export function PacienteDetalheLayout() {
   const { patientId } = useParams<{ patientId: string }>()
-  const [tab, setTab] = useState<PatientDetailTabId>("evolucao")
+  const { pathname } = useLocation()
+  const isConsultDetail = pathname.includes("/historico/consultas/")
 
   const detail = useMemo(
     () => (patientId ? getPatientDetailById(patientId) : undefined),
@@ -28,11 +29,15 @@ export function PacienteDetalhePage() {
     )
   }
 
+  const outletContext: PatientDetailOutletContext = { detail }
+
   return (
     <div className="mx-auto max-w-[1600px] p-10">
-      <PacienteDetalheHero detail={detail} />
-      <PacienteDetalheTablist value={tab} onChange={setTab} />
-      <PacienteDetalhePainel tab={tab} detail={detail} />
+      {!isConsultDetail ? <PacienteDetalheHero detail={detail} /> : null}
+      {!isConsultDetail ? <PacienteDetalheTablist patientId={patientId} /> : null}
+      <div className={isConsultDetail ? "w-full" : "grid grid-cols-12 gap-6"}>
+        <Outlet context={outletContext} />
+      </div>
     </div>
   )
 }

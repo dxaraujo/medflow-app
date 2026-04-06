@@ -49,8 +49,8 @@ export function PacienteEvolucaoEditor({ hero }: PacienteEvolucaoEditorProps) {
             isIconOnly
             variant="ghost"
             aria-label="Assistente"
-            className="text-primary hover:bg-[#cde5ff]/50"
-            onPress={() => {}}
+            className="text-primary hover:bg-primary-fixed/50"
+            onPress={() => { }}
           >
             <Sparkles className="size-5" />
           </Button>
@@ -58,8 +58,8 @@ export function PacienteEvolucaoEditor({ hero }: PacienteEvolucaoEditorProps) {
             isIconOnly
             variant="ghost"
             aria-label="Anexar arquivo"
-            className="text-primary hover:bg-[#cde5ff]/50"
-            onPress={() => {}}
+            className="text-primary hover:bg-primary-fixed/50"
+            onPress={() => { }}
           >
             <Paperclip className="size-5" />
           </Button>

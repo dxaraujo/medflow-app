@@ -76,6 +76,45 @@ export type PatientConsultHistoryRow = {
   summary: string
 }
 
+/** Diagnóstico na consulta (CID-10 opcional). */
+export type PatientConsultDiagnosis = {
+  cid10?: string
+  label: string
+  type: "principal" | "secundario"
+}
+
+/** Metadados do atendimento (protótipo). */
+export type PatientConsultMetadata = {
+  specialty?: string
+  unit?: string
+  crm?: string
+  visitType?: string
+  startedAt?: string
+}
+
+/** Prontuário completo de uma consulta (ambulatorial). */
+export type PatientConsultRecord = {
+  id: string
+  dateLabel: string
+  professional: string
+  metadata: PatientConsultMetadata
+  chiefComplaint: string
+  historyOfPresentIllness: string
+  reviewOfSystems?: string
+  pastMedicalHistory?: string
+  familyHistory?: string
+  medicationsAtVisit?: string
+  allergiesSnapshot?: string[]
+  vitalsAtVisit: PatientVital[]
+  physicalExam: string
+  diagnoses: PatientConsultDiagnosis[]
+  clinicalNotes: string
+  plan: string
+  linkedPrescriptionIds?: string[]
+  linkedExamIds?: string[]
+  documentsNote?: string
+}
+
 export type PatientPrescriptionRow = {
   id: string
   drug: string
@@ -508,6 +547,159 @@ const EXTENDED: Record<string, Omit<PatientDetail, "summary">> = {
       clinicalNoteMeta: "Paciente inativo — sem edições recentes",
     },
   },
+}
+
+function synthesizeConsultRecord(row: PatientConsultHistoryRow): PatientConsultRecord {
+  return {
+    id: row.id,
+    dateLabel: row.date,
+    professional: row.professional,
+    metadata: {},
+    chiefComplaint: row.reason,
+    historyOfPresentIllness:
+      "Registro resumido no sistema. O detalhamento completo do prontuário não está disponível neste protótipo.",
+    physicalExam: "—",
+    vitalsAtVisit: [],
+    diagnoses: [{ type: "principal", label: row.summary }],
+    clinicalNotes: "—",
+    plan: "—",
+  }
+}
+
+const CONSULT_RECORDS_BASE: Record<string, PatientConsultRecord> = {
+  c1: {
+    id: "c1",
+    dateLabel: "12 Out, 2023",
+    professional: "Dra. Liana Barbosa",
+    metadata: {
+      specialty: "Clínica Médica / Hipertensão",
+      unit: "Ambulatório — Unidade Centro",
+      crm: "52.12345-RJ",
+      visitType: "Retorno",
+      startedAt: "12 Out, 2023 — 14:30",
+    },
+    chiefComplaint: "Acompanhamento de hipertensão arterial sistêmica em uso de losartana.",
+    historyOfPresentIllness:
+      "Paciente em acompanhamento regular. Refere adesão ao tratamento, dieta hipossódica parcialmente seguida. Nega cefaleia, palpitações, dispneia aos esforços habituais ou edema em membros inferiores. Dorme 6–7 h/noite. Atividade física leve 2x/semana.",
+    reviewOfSystems:
+      "Cardiovascular: nega dor torácica. Respiratório: nega tosse ou dispneia em repouso. Digestivo: evacuações normais. Neurológico: nega parestesias ou déficits.",
+    pastMedicalHistory: "HAS há 8 anos; dislipidemia em controle; nega DM.",
+    familyHistory: "Pai com IAM aos 62 anos; mãe hipertensa.",
+    medicationsAtVisit: "Losartana 50 mg 1x manhã; sinvastatina 20 mg 1x noite (conforme prescrição vigente).",
+    allergiesSnapshot: ["Penicilina — urticária", "Dipirona — broncoespasmo"],
+    vitalsAtVisit: [
+      {
+        id: "cv1",
+        label: "Pressão arterial",
+        value: "128",
+        unit: "x 82 mmHg",
+        capturedAtLabel: "Consulta",
+      },
+      { id: "cv2", label: "Freq. cardíaca", value: "72", unit: "bpm", capturedAtLabel: "Consulta" },
+      { id: "cv3", label: "Temperatura", value: "36,4", unit: "°C", capturedAtLabel: "Consulta" },
+      { id: "cv4", label: "SpO₂", value: "98", unit: "%", capturedAtLabel: "Consulta" },
+      { id: "cv5", label: "Peso", value: "68", unit: "kg", capturedAtLabel: "Consulta" },
+      { id: "cv6", label: "Altura", value: "1,64", unit: "m", capturedAtLabel: "Consulta" },
+    ],
+    physicalExam:
+      "Estado geral: bom. Corado, hidratado, acianótico, anictérico. PA 128x82 mmHg, FC 72 bpm regular. ACV: bulhas rítmicas, sem sopros. AR: murmúrio vesicular presente, sem ruídos adventícios. MMII: sem edema; pulsos pediosos presentes.",
+    diagnoses: [
+      { type: "principal", cid10: "I10", label: "Hipertensão essencial (primária)" },
+      { type: "secundario", cid10: "E78.5", label: "Dislipidemia, não especificada" },
+    ],
+    clinicalNotes:
+      "**S:** refere estar bem, sem queixas agudas.\n**O:** PA controlada; exame físico sem alterações relevantes.\n**A:** HAS estável; risco cardiovascular moderado.\n**P:** manter esquema atual; reforçar dieta e exercício; retorno em 90 dias ou antes se sintomas.",
+    plan: "Manter losartana e sinvastatina. Orientar dieta hipossódica e atividade física moderada. Solicitar perfil lipídico em 6 meses se não realizado.",
+    linkedPrescriptionIds: ["p1", "p2"],
+    linkedExamIds: ["x1"],
+    documentsNote: "Orientações por escrito entregues ao paciente. Sem atestado nesta data.",
+  },
+  c2: {
+    id: "c2",
+    dateLabel: "05 Out, 2023",
+    professional: "Dra. Liana Barbosa",
+    metadata: {
+      specialty: "Clínica Médica",
+      unit: "Ambulatório — Unidade Centro",
+      crm: "52.12345-RJ",
+      visitType: "Consulta agendada",
+      startedAt: "05 Out, 2023 — 09:15",
+    },
+    chiefComplaint: "Cefaleia holocraniana há 3 dias, intensidade leve a moderada.",
+    historyOfPresentIllness:
+      "Início gradual, sem fotofobia ou rigidez de nuca. Nega febre. Relaciona com noites mal dormidas e estresse laboral. Não usou analgésicos de forma regular.",
+    reviewOfSystems: "Neurológico: nega déficit motor ou sensitivo. ENT: nega otalgia.",
+    pastMedicalHistory: "HAS; nega trauma craniano recente.",
+    familyHistory: "Sem histórico de migrânea.",
+    medicationsAtVisit: "Losartana 50 mg; uso ocasional de dipirona evitado (alergia).",
+    allergiesSnapshot: ["Penicilina — urticária", "Dipirona — broncoespasmo"],
+    vitalsAtVisit: [
+      { id: "cv1", label: "Pressão arterial", value: "126", unit: "x 80 mmHg", capturedAtLabel: "Consulta" },
+      { id: "cv2", label: "Freq. cardíaca", value: "76", unit: "bpm", capturedAtLabel: "Consulta" },
+      { id: "cv3", label: "Temperatura", value: "36,2", unit: "°C", capturedAtLabel: "Consulta" },
+    ],
+    physicalExam:
+      "Paciente lúcida, orientada. Pescoço sem rigidez. Fundoscopia não realizada nesta unidade. Sinus pernas livres.",
+    diagnoses: [
+      { type: "principal", cid10: "R51", label: "Cefaleia" },
+      { type: "secundario", cid10: "I10", label: "Hipertensão essencial (primária) — estável" },
+    ],
+    clinicalNotes:
+      "Cefaleia tensional provável, contexto de sono e estresse. Excluir sinais de alarme neste momento.",
+    plan: "Hidratação, higiene do sono, analgésico alternativo à dipirona conforme lista da instituição. Retorno se piora ou déficit neurológico.",
+    linkedPrescriptionIds: ["p1"],
+    linkedExamIds: [],
+    documentsNote: "Nenhum documento adicional.",
+  },
+  c3: {
+    id: "c3",
+    dateLabel: "28 Set, 2023",
+    professional: "Dr. Paulo Nunes",
+    metadata: {
+      specialty: "Cirurgia Geral",
+      unit: "Ambulatório — Unidade Sul",
+      crm: "48.99887-RJ",
+      visitType: "Pós-operatório",
+      startedAt: "28 Set, 2023 — 11:00",
+    },
+    chiefComplaint: "Retorno pós-operatório para avaliação de ferida operatória.",
+    historyOfPresentIllness:
+      "Colecistectomia videolaparoscópica há 21 dias. Refere melhora progressiva da dor abdominal. Nega febre, náuseas ou secreção purulenta no sítio cirúrgico.",
+    pastMedicalHistory: "Litíase biliar; HAS em uso de IECA (suspensa no perioperatório, reiniciada).",
+    familyHistory: "Sem alterações relevantes.",
+    medicationsAtVisit: "Analgésico conforme prescrição de alta; losartana reiniciada há 1 semana.",
+    allergiesSnapshot: ["Penicilina — urticária"],
+    vitalsAtVisit: [
+      { id: "cv1", label: "Pressão arterial", value: "122", unit: "x 78 mmHg", capturedAtLabel: "Consulta" },
+      { id: "cv2", label: "Temperatura", value: "36,5", unit: "°C", capturedAtLabel: "Consulta" },
+    ],
+    physicalExam:
+      "Abdome plano, flácido, indolor à palpação superficial e profunda. Ferida operatória limpa, sem hiperemia ou deiscência. Sem massas palpáveis.",
+    diagnoses: [
+      { type: "principal", cid10: "Z48.8", label: "Cuidado pós-operatório, seguimento" },
+      { type: "secundario", cid10: "K80.1", label: "Cálculo da vesícula biliar com colecistite — tratado" },
+    ],
+    clinicalNotes: "Evolução pós-operatória satisfatória. Paciente orientado sobre sinais de alarme.",
+    plan: "Liberar atividades leves; retorno se dor intensa, febre ou sangramento.",
+    linkedPrescriptionIds: [],
+    linkedExamIds: ["x2"],
+    documentsNote: "Declaração de comparecimento disponível na recepção.",
+  },
+}
+
+const CONSULT_RECORDS_BY_PATIENT: Record<string, Record<string, PatientConsultRecord>> = {
+  "84920": CONSULT_RECORDS_BASE,
+  "84921": { c1: CONSULT_RECORDS_BASE.c1, c2: CONSULT_RECORDS_BASE.c2 },
+  "84922": { c1: CONSULT_RECORDS_BASE.c1, c2: CONSULT_RECORDS_BASE.c2 },
+}
+
+export function getConsultRecord(patientId: string, consultId: string): PatientConsultRecord | null {
+  const detail = getPatientDetailById(patientId)
+  if (!detail) return null
+  const row = detail.consults.find((c) => c.id === consultId)
+  if (!row) return null
+  const full = CONSULT_RECORDS_BY_PATIENT[patientId]?.[consultId]
+  return full ?? synthesizeConsultRecord(row)
 }
 
 export function getPatientDetailById(patientId: string): PatientDetail | undefined {

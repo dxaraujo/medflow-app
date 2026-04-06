@@ -81,6 +81,20 @@
   }
 }
 
+@media print {
+  aside {
+    display: none !important;
+  }
+
+  main.ml-64 {
+    margin-left: 0 !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
 @layer base {
   body {
     @apply bg-background text-foreground font-sans antialiased;
