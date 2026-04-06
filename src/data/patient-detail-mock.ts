@@ -74,6 +74,8 @@ export type PatientConsultHistoryRow = {
   professional: string
   reason: string
   summary: string
+  /** Prescrições vinculadas (além de `consultId` em cada item). */
+  linkedPrescriptionIds?: string[]
 }
 
 /** Diagnóstico na consulta (CID-10 opcional). */
@@ -115,8 +117,23 @@ export type PatientConsultRecord = {
   documentsNote?: string
 }
 
-export type PatientPrescriptionRow = {
+export type PatientPrescriptionKind = "medicacao" | "orientacao"
+
+/** Tipos de receituário (Brasil / protótipo). */
+export type PatientPrescriptionRecipeType =
+  | "receituario_simples"
+  | "receita_controle_especial"
+  | "receita_azul"
+  | "receita_amarela"
+  | "receita_branca_talidomida"
+  | "receita_branca_retinoides"
+
+export type PatientPrescriptionMedicationRow = {
   id: string
+  kind: "medicacao"
+  recipeType: PatientPrescriptionRecipeType
+  /** Consulta de origem; omitir para itens só em `linkedPrescriptionIds` ou órfãos. */
+  consultId?: string
   drug: string
   dose: string
   frequency: string
@@ -124,6 +141,23 @@ export type PatientPrescriptionRow = {
   end?: string
   status: string
 }
+
+export type PatientPrescriptionOrientationRow = {
+  id: string
+  kind: "orientacao"
+  consultId?: string
+  /** Se definido, orientação associada à prescrição do medicamento com este `id` (mesma consulta). */
+  linkedPrescriptionId?: string
+  /** Texto da orientação (título ou corpo). */
+  drug: string
+  dose: string
+  frequency: string
+  start: string
+  end?: string
+  status: string
+}
+
+export type PatientPrescriptionRow = PatientPrescriptionMedicationRow | PatientPrescriptionOrientationRow
 
 export type PatientExamRow = {
   id: string
@@ -297,6 +331,7 @@ const DETAIL_84920: Omit<PatientDetail, "summary"> = {
       professional: "Dra. Liana Barbosa",
       reason: "Rotina / HAS",
       summary: "PA controlada; mantida prescrição.",
+      linkedPrescriptionIds: ["p1", "p2", "p4", "p4b"],
     },
     {
       id: "c2",
@@ -304,6 +339,7 @@ const DETAIL_84920: Omit<PatientDetail, "summary"> = {
       professional: "Dra. Liana Barbosa",
       reason: "Cefaleia",
       summary: "Sintoma leve; observação.",
+      linkedPrescriptionIds: ["p5", "p6", "p7"],
     },
     {
       id: "c3",
@@ -311,31 +347,116 @@ const DETAIL_84920: Omit<PatientDetail, "summary"> = {
       professional: "Dr. Paulo Nunes",
       reason: "Pós-operatório",
       summary: "Cicatrização adequada.",
+      linkedPrescriptionIds: ["p8", "p11"],
     },
   ],
   prescriptions: [
     {
       id: "p1",
+      kind: "medicacao",
+      recipeType: "receituario_simples",
+      consultId: "c1",
       drug: "Losartana potássica",
       dose: "50 mg",
       frequency: "1x ao dia (manhã)",
-      start: "05 Out, 2023",
+      start: "12 Out, 2023",
       status: "Ativa",
     },
     {
       id: "p2",
+      kind: "medicacao",
+      recipeType: "receita_controle_especial",
+      consultId: "c1",
       drug: "Sinvastatina",
       dose: "20 mg",
       frequency: "1x ao dia (noite)",
-      start: "15 Set, 2023",
+      start: "12 Out, 2023",
       end: "—",
       status: "Ativa",
     },
     {
+      id: "p4",
+      kind: "orientacao",
+      consultId: "c1",
+      drug: "Dieta hipossódica; atividade física moderada 150 min/semana; retorno em 90 dias.",
+      dose: "—",
+      frequency: "—",
+      start: "12 Out, 2023",
+      status: "Orientação geral",
+    },
+    {
+      id: "p4b",
+      kind: "orientacao",
+      consultId: "c1",
+      linkedPrescriptionId: "p1",
+      drug:
+        "Tomar Losartana sempre no mesmo horário; não interromper sem orientação médica. Em caso de tontura leve ao levantar, levantar devagar.",
+      dose: "—",
+      frequency: "—",
+      start: "12 Out, 2023",
+      status: "Orientação vinculada",
+    },
+    {
+      id: "p5",
+      kind: "medicacao",
+      recipeType: "receita_amarela",
+      consultId: "c2",
+      drug: "Amoxicilina",
+      dose: "500 mg",
+      frequency: "8/8 h por 7 dias",
+      start: "05 Out, 2023",
+      status: "Encerrada",
+    },
+    {
+      id: "p6",
+      kind: "medicacao",
+      recipeType: "receituario_simples",
+      consultId: "c2",
+      drug: "Omeprazol",
+      dose: "20 mg",
+      frequency: "1x ao dia (jejum)",
+      start: "05 Out, 2023",
+      status: "Ativa",
+    },
+    {
+      id: "p7",
+      kind: "medicacao",
+      recipeType: "receita_azul",
+      consultId: "c2",
+      drug: "Clonazepam",
+      dose: "0,5 mg",
+      frequency: "1x ao dia (noite)",
+      start: "05 Out, 2023",
+      status: "Ativa",
+    },
+    {
+      id: "p8",
+      kind: "orientacao",
+      consultId: "c3",
+      drug: "Repouso relativo às atividades laborais pesadas por 14 dias; curativo em ferida operatória conforme orientação da equipe cirúrgica.",
+      dose: "—",
+      frequency: "—",
+      start: "28 Set, 2023",
+      status: "Orientação geral",
+    },
+    {
+      id: "p11",
+      kind: "medicacao",
+      recipeType: "receita_branca_talidomida",
+      consultId: "c3",
+      drug: "Talidomida",
+      dose: "100 mg",
+      frequency: "Conforme protocolo oncológico institucional",
+      start: "28 Set, 2023",
+      status: "Ativa",
+    },
+    {
       id: "p3",
-      drug: "Vitamina D",
-      dose: "7.000 UI",
-      frequency: "1x por semana",
+      kind: "medicacao",
+      recipeType: "receita_branca_retinoides",
+      drug: "Isotretinoína",
+      dose: "20 mg",
+      frequency: "1x ao dia com alimentos",
       start: "01 Set, 2023",
       end: "30 Nov, 2023",
       status: "Encerrada",
@@ -610,7 +731,7 @@ const CONSULT_RECORDS_BASE: Record<string, PatientConsultRecord> = {
     clinicalNotes:
       "**S:** refere estar bem, sem queixas agudas.\n**O:** PA controlada; exame físico sem alterações relevantes.\n**A:** HAS estável; risco cardiovascular moderado.\n**P:** manter esquema atual; reforçar dieta e exercício; retorno em 90 dias ou antes se sintomas.",
     plan: "Manter losartana e sinvastatina. Orientar dieta hipossódica e atividade física moderada. Solicitar perfil lipídico em 6 meses se não realizado.",
-    linkedPrescriptionIds: ["p1", "p2"],
+    linkedPrescriptionIds: ["p1", "p2", "p4", "p4b"],
     linkedExamIds: ["x1"],
     documentsNote: "Orientações por escrito entregues ao paciente. Sem atestado nesta data.",
   },
@@ -647,7 +768,7 @@ const CONSULT_RECORDS_BASE: Record<string, PatientConsultRecord> = {
     clinicalNotes:
       "Cefaleia tensional provável, contexto de sono e estresse. Excluir sinais de alarme neste momento.",
     plan: "Hidratação, higiene do sono, analgésico alternativo à dipirona conforme lista da instituição. Retorno se piora ou déficit neurológico.",
-    linkedPrescriptionIds: ["p1"],
+    linkedPrescriptionIds: ["p5", "p6", "p7"],
     linkedExamIds: [],
     documentsNote: "Nenhum documento adicional.",
   },
@@ -681,7 +802,7 @@ const CONSULT_RECORDS_BASE: Record<string, PatientConsultRecord> = {
     ],
     clinicalNotes: "Evolução pós-operatória satisfatória. Paciente orientado sobre sinais de alarme.",
     plan: "Liberar atividades leves; retorno se dor intensa, febre ou sangramento.",
-    linkedPrescriptionIds: [],
+    linkedPrescriptionIds: ["p8", "p11"],
     linkedExamIds: ["x2"],
     documentsNote: "Declaração de comparecimento disponível na recepção.",
   },

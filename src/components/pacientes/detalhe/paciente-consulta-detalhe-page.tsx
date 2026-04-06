@@ -1,6 +1,7 @@
 import { usePatientDetailOutlet } from "@/components/pacientes/detalhe/paciente-detalhe-tab-routes"
 import { cn } from "@heroui/react"
-import type { PatientConsultRecord } from "@/data/patient-detail-mock"
+import { flattenPrescriptionBlocks, type PrescriptionListBlock } from "@/data/prescription-grouping"
+import type { PatientConsultRecord, PatientPrescriptionRow } from "@/data/patient-detail-mock"
 import { getConsultRecord } from "@/data/patient-detail-mock"
 import { ArrowLeft, Printer, Stethoscope, User } from "lucide-react"
 import type { ReactNode } from "react"
@@ -28,6 +29,93 @@ function Section({
       <div className="font-body text-sm leading-relaxed text-on-surface">{children}</div>
     </section>
   )
+}
+
+function ConsultPrescriptionBlockRow({
+  block,
+  compactAfterMed,
+  prescriptionById,
+}: {
+  block: PrescriptionListBlock
+  compactAfterMed: boolean
+  prescriptionById: Map<string, PatientPrescriptionRow>
+}) {
+  switch (block.kind) {
+    case "medication": {
+      const p = block.item
+      return (
+        <li className="rounded-lg border border-outline-variant/10 bg-surface-container-high/40 p-3">
+          <p className="font-semibold text-on-surface">{p.drug}</p>
+          <p className="text-xs text-on-surface-variant">
+            {p.dose} · {p.frequency} · {p.status}
+          </p>
+        </li>
+      )
+    }
+    case "orientation_linked": {
+      const p = block.item
+      return (
+        <li
+          className={cn(
+            "rounded-r-md border border-outline-variant/8 border-l-outline-variant/30 bg-surface-container-highest/30 py-2 pl-3 pr-2 text-on-surface-variant sm:ml-3 sm:border-l-2 sm:pl-3",
+            compactAfterMed && "-mt-0.5",
+          )}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-on-surface-variant/55">
+            Orientação (medicamento acima)
+          </p>
+          <p className="mt-0.5 text-sm leading-snug">{p.drug}</p>
+          <p className="mt-1 text-[11px] text-on-surface-variant/70">
+            {p.status}
+            {p.start ? ` · ${p.start}` : ""}
+          </p>
+        </li>
+      )
+    }
+    case "orientation_general": {
+      const p = block.item
+      return (
+        <li className="rounded-lg border border-secondary-container/35 bg-secondary-container/10 p-3">
+          <p className="text-[10px] font-bold uppercase text-on-secondary-container">Orientação geral</p>
+          <p className="mt-1 font-semibold text-on-surface">{p.drug}</p>
+          <p className="mt-1 text-xs text-on-surface-variant">
+            {p.status}
+            {p.start ? ` · ${p.start}` : ""}
+          </p>
+        </li>
+      )
+    }
+    case "orientation_dangling": {
+      const p = block.item
+      const linked = p.linkedPrescriptionId ? prescriptionById.get(p.linkedPrescriptionId) : undefined
+      const linkedName = linked?.kind === "medicacao" ? linked.drug : undefined
+      return (
+        <li className="rounded-lg border border-outline-variant/15 bg-surface-container-high/25 p-3">
+          <p className="text-[10px] font-bold uppercase text-on-surface-variant">Orientação vinculada</p>
+          <p className="mt-1 font-semibold text-on-surface">{p.drug}</p>
+          {p.linkedPrescriptionId ? (
+            <p className="mt-0.5 text-xs text-on-surface-variant">
+              {linkedName ? (
+                <>
+                  Referente a <span className="font-medium text-on-surface">{linkedName}</span>
+                </>
+              ) : (
+                "Medicamento vinculado não listado neste atendimento."
+              )}
+            </p>
+          ) : null}
+          <p className="mt-1 text-xs text-on-surface-variant">
+            {p.status}
+            {p.start ? ` · ${p.start}` : ""}
+          </p>
+        </li>
+      )
+    }
+    default: {
+      const _x: never = block
+      return _x
+    }
+  }
 }
 
 function VitalsGrid({ vitals }: { vitals: PatientConsultRecord["vitalsAtVisit"] }) {
@@ -70,6 +158,8 @@ export function PacienteConsultaDetalhePage() {
 
   const { summary, personal } = detail
   const prescriptions = detail.prescriptions.filter((p) => record.linkedPrescriptionIds?.includes(p.id))
+  const prescriptionBlocks = flattenPrescriptionBlocks(prescriptions)
+  const prescriptionById = new Map(detail.prescriptions.map((x) => [x.id, x] as const))
   const exams = detail.exams.filter((x) => record.linkedExamIds?.includes(x.id))
 
   const handlePrint = () => {
@@ -250,21 +340,24 @@ export function PacienteConsultaDetalhePage() {
 
         <section className="grid gap-6 lg:grid-cols-2">
           <Section title="Prescrições vinculadas">
-            {prescriptions.length === 0 ? (
+            {prescriptionBlocks.length === 0 ? (
               <p className="text-on-surface-variant">Nenhuma prescrição vinculada a este atendimento.</p>
             ) : (
-              <ul className="space-y-3">
-                {prescriptions.map((p) => (
-                  <li
-                    key={p.id}
-                    className="rounded-lg border border-outline-variant/10 bg-surface-container-high/40 p-3"
-                  >
-                    <p className="font-semibold text-on-surface">{p.drug}</p>
-                    <p className="text-xs text-on-surface-variant">
-                      {p.dose} · {p.frequency} · {p.status}
-                    </p>
-                  </li>
-                ))}
+              <ul className="space-y-2.5">
+                {prescriptionBlocks.map((block, i) => {
+                  const prev = i > 0 ? prescriptionBlocks[i - 1] : undefined
+                  const afterMed =
+                    block.kind === "orientation_linked" &&
+                    (prev?.kind === "medication" || prev?.kind === "orientation_linked")
+                  return (
+                    <ConsultPrescriptionBlockRow
+                      key={block.item.id}
+                      block={block}
+                      compactAfterMed={afterMed}
+                      prescriptionById={prescriptionById}
+                    />
+                  )
+                })}
               </ul>
             )}
           </Section>

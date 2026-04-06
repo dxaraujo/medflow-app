@@ -1,17 +1,10 @@
 import { usePatientDetailOutlet } from "@/components/pacientes/detalhe/paciente-detalhe-tab-routes"
 import type { PatientConsultHistoryRow } from "@/data/patient-detail-mock"
+import { parseConsultDateLabel } from "@/utils/consult-date"
 import { ArrowRight, ChevronLeft, ChevronRight, User } from "lucide-react"
 import { Link, useParams } from "react-router-dom"
 
 const DIAGNOSIS_DOT = ["bg-orange-400", "bg-emerald-400", "bg-slate-300"] as const
-
-function parseConsultDateLabel(date: string): { year: string; dayMonth: string } {
-  const m = date.match(/^(.+),\s*(\d{4})\s*$/)
-  if (m) {
-    return { year: m[2]!.trim(), dayMonth: m[1]!.trim() }
-  }
-  return { year: "", dayMonth: date }
-}
 
 function ConsultHistoryCard({
   row,
