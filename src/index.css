@@ -17,8 +17,15 @@
   --color-surface-container-low: #f2f4f5;
   --color-outline-variant: #c1c7d0;
   --color-error: #ba1a1a;
-  --color-on-secondary-container: #4f6576;
+  --color-error-container: #ffdad6;
   --color-on-error-container: #93000a;
+  --color-on-secondary-container: #4f6576;
+  --color-secondary: #4a6172;
+  --color-secondary-container: #cbe3f6;
+  --color-tertiary: #592e00;
+  --color-tertiary-container: #7a4201;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface: #f8fafb;
   --color-agenda-procedure: #6d4c41;
 }
 
