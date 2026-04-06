@@ -1,7 +1,7 @@
 import { DashboardAnalyticsSection } from "@/components/dashboard/dashboard-analytics-section"
 import { DashboardKpiSection } from "@/components/dashboard/dashboard-kpi-section"
 import { DashboardOverviewAside } from "@/components/dashboard/dashboard-overview-aside"
-import { PageHero } from "@/components/dashboard/page-hero"
+import { PageHero } from "@/components/layout/page-hero"
 
 export function DashboardPage() {
   return (

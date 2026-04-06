@@ -1,11 +1,10 @@
-import { Button } from "@heroui/react"
+import { Button, SearchField } from "@heroui/react"
 import {
   ChevronLeft,
   ChevronRight,
   Download,
   Filter,
   MoreVertical,
-  Search,
   UserPlus,
 } from "lucide-react"
 import { useMemo, useState } from "react"
@@ -15,6 +14,7 @@ import {
   type PatientRow,
   type PatientStatus,
 } from "@/data/patients-mock"
+import { PageHero } from "../layout/page-hero"
 
 const STATUS_BADGE: Record<PatientStatus, string> = {
   ativo: "bg-emerald-100 text-emerald-800",
@@ -54,49 +54,39 @@ export function PacientesPage() {
   )
 
   return (
-    <div className="mx-auto max-w-7xl space-y-10 p-12">
-      <section className="mb-2 space-y-2">
-        <span className="font-headline text-xs font-bold uppercase tracking-widest text-primary">
-          Gestão de Saúde
-        </span>
-        <h1 className="font-headline text-5xl font-extrabold tracking-tight text-on-surface">
-          Lista de Pacientes
-        </h1>
-        <p className="max-w-2xl font-body text-lg text-on-surface-variant">
-          Gerencie seus prontuários e acompanhe o histórico de consultas em um ambiente sereno e organizado.
-        </p>
-      </section>
-
-      <section className="flex flex-col items-stretch gap-4 md:flex-row">
-        <div className="flex grow items-center rounded-xl border border-outline-variant/20 bg-surface-container-low px-6 py-4 shadow-sm transition-all focus-within:ring-2 focus-within:ring-primary/20">
-          <Search className="size-6 shrink-0 text-outline" aria-hidden />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar por nome, CPF ou ID do paciente..."
-            className="ml-3 w-full border-none bg-transparent font-body text-base text-on-surface placeholder:text-outline/60 focus:ring-0"
-            aria-label="Buscar pacientes"
-          />
-        </div>
+    <div className="mx-auto p-12">
+      <PageHero
+        title="Lista de Pacientes"
+        subtitle="Gerencie seus prontuários e acompanhe o histórico de consultas em um ambiente sereno e organizado."/>
+      <section className="mt-12 flex flex-col items-stretch gap-4 md:flex-row">
+        <SearchField
+          name="search"
+          aria-label="Buscar pacientes"
+          variant="secondary"
+          onChange={(e) => setQuery(e)}
+          className="w-full">
+          <SearchField.Group className="flex grow items-center rounded-xl border border-outline-variant/20 bg-surface-container-low px-6 py-4 shadow-sm transition-all focus-within:ring-2 focus-within:ring-primary/20">
+            <SearchField.SearchIcon className="size-6 shrink-0 text-outline" aria-hidden />
+            <SearchField.Input placeholder="Buscar por nome, CPF ou ID do paciente..." />
+            <SearchField.ClearButton />
+          </SearchField.Group>
+        </SearchField>
         <Button
           className="h-auto min-h-14 rounded-xl px-8 py-4 font-headline text-base font-bold shadow-lg shadow-primary/20"
           variant="primary"
-          onPress={() => {}}
-        >
+          onPress={() => { }}>
           <UserPlus className="size-5 shrink-0" aria-hidden />
           Novo Paciente
         </Button>
       </section>
-
-      <div className="overflow-hidden rounded-xl bg-surface-container-low shadow-sm">
+      <div className="mt-12 rounded-xl bg-surface-container-low shadow-sm">
         <div className="flex items-center justify-between border-b border-outline-variant/10 p-8">
           <h2 className="font-headline text-xl font-bold text-on-surface">Diretório de Pacientes</h2>
           <div className="flex gap-4">
             <Button
               variant="ghost"
               className="gap-2 px-4 py-2 font-label text-sm text-on-surface-variant hover:text-primary"
-              onPress={() => {}}
+              onPress={() => { }}
             >
               <Filter className="size-4" aria-hidden />
               Filtros
@@ -104,7 +94,7 @@ export function PacientesPage() {
             <Button
               variant="ghost"
               className="gap-2 px-4 py-2 font-label text-sm text-on-surface-variant hover:text-primary"
-              onPress={() => {}}
+              onPress={() => { }}
             >
               <Download className="size-4" aria-hidden />
               Exportar
@@ -168,7 +158,7 @@ export function PacientesPage() {
                         variant="ghost"
                         aria-label={`Ações para ${patient.name}`}
                         className="text-outline hover:bg-white hover:text-primary"
-                        onPress={() => {}}
+                        onPress={() => { }}
                       >
                         <MoreVertical className="size-5" />
                       </Button>
@@ -192,28 +182,28 @@ export function PacientesPage() {
               variant="ghost"
               aria-label="Página anterior"
               className="size-10 min-w-10 rounded-full border border-outline-variant/30 text-outline hover:border-primary hover:text-primary"
-              onPress={() => {}}
+              onPress={() => { }}
             >
               <ChevronLeft className="size-5" />
             </Button>
             <Button
               variant="primary"
               className="size-10 min-w-10 rounded-full p-0 font-bold"
-              onPress={() => {}}
+              onPress={() => { }}
             >
               1
             </Button>
             <Button
               variant="ghost"
               className="size-10 min-w-10 rounded-full p-0 font-bold text-on-surface-variant hover:bg-surface-container-highest"
-              onPress={() => {}}
+              onPress={() => { }}
             >
               2
             </Button>
             <Button
               variant="ghost"
               className="size-10 min-w-10 rounded-full p-0 font-bold text-on-surface-variant hover:bg-surface-container-highest"
-              onPress={() => {}}
+              onPress={() => { }}
             >
               3
             </Button>
@@ -222,7 +212,7 @@ export function PacientesPage() {
               variant="ghost"
               aria-label="Próxima página"
               className="size-10 min-w-10 rounded-full border border-outline-variant/30 text-outline hover:border-primary hover:text-primary"
-              onPress={() => {}}
+              onPress={() => { }}
             >
               <ChevronRight className="size-5" />
             </Button>
