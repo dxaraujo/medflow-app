@@ -3,6 +3,7 @@ import { AppHeader } from "@/components/app-header"
 import { AppSidebar } from "@/components/app-sidebar"
 import { AgendaPage } from "@/components/agenda/agenda-page"
 import { DashboardPage } from "@/components/dashboard-page"
+import { PacienteDetalhePage } from "@/components/pacientes/detalhe/paciente-detalhe-page"
 import { PacientesPage } from "@/components/pacientes/pacientes-page"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 
@@ -23,6 +24,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/agenda" element={<AgendaPage />} />
+          <Route path="/pacientes/:patientId" element={<PacienteDetalhePage />} />
           <Route path="/pacientes" element={<PacientesPage />} />
           <Route path="/prontuarios" element={<PlaceholderPage title="Prontuários" />} />
           <Route path="/configuracoes" element={<PlaceholderPage title="Configurações" />} />

@@ -3,6 +3,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  ExternalLink,
   Filter,
   MoreVertical,
   UserPlus,
@@ -10,23 +11,13 @@ import {
 import { useMemo, useState } from "react"
 import {
   PATIENTS_MOCK,
+  PATIENT_STATUS_BADGE,
+  PATIENT_STATUS_LABEL,
   PATIENTS_TOTAL_DIRECTORY,
   type PatientRow,
-  type PatientStatus,
 } from "@/data/patients-mock"
 import { PageHero } from "../layout/page-hero"
-
-const STATUS_BADGE: Record<PatientStatus, string> = {
-  ativo: "bg-emerald-100 text-emerald-800",
-  em_pausa: "bg-amber-100 text-amber-800",
-  inativo: "bg-slate-200 text-slate-700",
-}
-
-const STATUS_LABEL: Record<PatientStatus, string> = {
-  ativo: "Ativo",
-  em_pausa: "Em Pausa",
-  inativo: "Inativo",
-}
+import { Link, useNavigate } from "react-router-dom"
 
 function matchesQuery(patient: PatientRow, q: string): boolean {
   const trimmed = q.trim().toLowerCase()
@@ -46,6 +37,7 @@ function formatCount(n: number): string {
 }
 
 export function PacientesPage() {
+  const navigate = useNavigate()
   const [query, setQuery] = useState("")
 
   const filtered = useMemo(
@@ -127,7 +119,10 @@ export function PacientesPage() {
                     className="group transition-colors hover:bg-surface-container-highest"
                   >
                     <td className="px-8 py-6">
-                      <div className="flex items-center gap-4">
+                      <Link
+                        to={`/pacientes/${patient.id}`}
+                        className="flex items-center gap-4 rounded-lg outline-none transition-colors hover:bg-surface-container-high/80 focus-visible:ring-2 focus-visible:ring-primary/30"
+                      >
                         <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary-container font-bold text-primary">
                           <img
                             src={patient.avatarUrl}
@@ -139,7 +134,7 @@ export function PacientesPage() {
                           <p className="font-headline font-bold text-on-surface">{patient.name}</p>
                           <p className="text-xs text-on-surface-variant">ID: {patient.displayId}</p>
                         </div>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-8 py-6 font-body text-sm text-on-surface-variant">
                       {patient.lastConsultLabel}
@@ -147,21 +142,32 @@ export function PacientesPage() {
                     <td className="px-8 py-6 font-body text-sm text-on-surface-variant">{patient.phone}</td>
                     <td className="px-8 py-6">
                       <span
-                        className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-tighter ${STATUS_BADGE[patient.status]}`}
+                        className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-tighter ${PATIENT_STATUS_BADGE[patient.status]}`}
                       >
-                        {STATUS_LABEL[patient.status]}
+                        {PATIENT_STATUS_LABEL[patient.status]}
                       </span>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <Button
-                        isIconOnly
-                        variant="ghost"
-                        aria-label={`Ações para ${patient.name}`}
-                        className="text-outline hover:bg-white hover:text-primary"
-                        onPress={() => { }}
-                      >
-                        <MoreVertical className="size-5" />
-                      </Button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          isIconOnly
+                          variant="ghost"
+                          aria-label={`Abrir prontuário de ${patient.name}`}
+                          className="text-outline hover:bg-white hover:text-primary"
+                          onPress={() => navigate(`/pacientes/${patient.id}`)}
+                        >
+                          <ExternalLink className="size-5" />
+                        </Button>
+                        <Button
+                          isIconOnly
+                          variant="ghost"
+                          aria-label={`Mais ações para ${patient.name}`}
+                          className="text-outline hover:bg-white hover:text-primary"
+                          onPress={() => { }}
+                        >
+                          <MoreVertical className="size-5" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))

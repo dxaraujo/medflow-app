@@ -1,5 +1,17 @@
 export type PatientStatus = "ativo" | "em_pausa" | "inativo"
 
+export const PATIENT_STATUS_BADGE: Record<PatientStatus, string> = {
+  ativo: "bg-emerald-100 text-emerald-800",
+  em_pausa: "bg-amber-100 text-amber-800",
+  inativo: "bg-slate-200 text-slate-700",
+}
+
+export const PATIENT_STATUS_LABEL: Record<PatientStatus, string> = {
+  ativo: "Ativo",
+  em_pausa: "Em Pausa",
+  inativo: "Inativo",
+}
+
 export type PatientRow = {
   id: string
   displayId: string
