@@ -37,13 +37,29 @@ export type PatientAnnotation = {
 }
 
 export type PatientPersonalData = {
+  fullName: string
+  cpf: string
   birthDate: string
-  cpfMasked: string
+  gender: string
+  motherName: string
   email: string
-  address: string
-  insurance: string
+  whatsappPhone: string
   emergencyContact: string
   emergencyPhone: string
+  address: {
+    street: string
+    number: string
+    complement: string
+    district: string
+    city: string
+    state: string
+    zipCode: string
+  }
+  insurance: {
+    planName: string
+    cardNumber: string
+    validUntil: string
+  }
 }
 
 export type PatientEvolutionEntry = {
@@ -88,7 +104,9 @@ export type PatientTimelineEvent = {
 }
 
 export type PatientHeroMeta = {
-  ageGenderLabel: string
+  age: string
+  gender: string
+  cpf: string
   /** Texto inicial do editor de evolução (protótipo). */
   clinicalNoteDraft: string
   /** Rodapé tipo “Última alteração: …”. */
@@ -192,13 +210,29 @@ const DETAIL_84920: Omit<PatientDetail, "summary"> = {
     },
   ],
   personal: {
+    fullName: "Helena Bittencourt de Oliveira",
+    cpf: "042.883.912-44",
     birthDate: "14/03/1978",
-    cpfMasked: "***.***.***-20",
+    gender: "Feminino",
+    motherName: "Maria Eduarda Bittencourt",
     email: "helena.souza@email.com",
-    address: "Rua das Acácias, 120 — Jardim Paulista, São Paulo — SP",
-    insurance: "Unimed — Plano Enfermaria",
+    whatsappPhone: "(21) 98842-1203",
     emergencyContact: "Mariana Souza (filha)",
     emergencyPhone: "(11) 98888-7766",
+    address: {
+      street: "Rua das Laranjeiras",
+      number: "452",
+      complement: "Apto 302 - Bloco B",
+      district: "Laranjeiras",
+      city: "Rio de Janeiro",
+      state: "RJ",
+      zipCode: "22240-006",
+    },
+    insurance: {
+      planName: "Unimed Nacional - Diamante",
+      cardNumber: "0 034 991204423 001",
+      validUntil: "12/2025",
+    },
   },
   evolution: [
     {
@@ -292,7 +326,9 @@ const DETAIL_84920: Omit<PatientDetail, "summary"> = {
     },
   ],
   hero: {
-    ageGenderLabel: "46 anos • Feminino",
+    age: "46",
+    gender: "Feminino",
+    cpf: "042.883.912-44",
     clinicalNoteDraft:
       "Queixa principal: acompanhamento de HAS em uso regular de losartana.\n\nAnamnese: refere estar bem, sem edema em membros inferiores, sem cefaleia ou palpitações. Nega dispneia aos esforços habituais.\n\nConduta: manter medicação atual; reforçar dieta hipossódica e atividade física moderada. Retorno em 90 dias ou antes se sintomas.",
     clinicalNoteMeta: "Última alteração: há 2 min por Dra. Liana Barbosa",
@@ -313,13 +349,29 @@ function minimalDetail(row: PatientRow): PatientDetail {
     alerts: [],
     annotations: [],
     personal: {
+      fullName: row.name,
+      cpf: "***.***.***-**",
       birthDate: "—",
-      cpfMasked: "***.***.***-**",
+      gender: "—",
+      motherName: "—",
       email: "—",
-      address: "—",
-      insurance: "—",
+      whatsappPhone: "—",
       emergencyContact: "—",
       emergencyPhone: "—",
+      address: {
+        street: "—",
+        number: "—",
+        complement: "—",
+        district: "—",
+        city: "—",
+        state: "—",
+        zipCode: "—",
+      },
+      insurance: {
+        planName: "—",
+        cardNumber: "—",
+        validUntil: "—",
+      },
     },
     evolution: [],
     consults: [
@@ -344,7 +396,9 @@ function minimalDetail(row: PatientRow): PatientDetail {
       },
     ]),
     hero: {
-      ageGenderLabel: "—",
+      age: "—",
+      gender: "—",
+      cpf: "***.***.***-**",
       clinicalNoteDraft: "",
       clinicalNoteMeta: row.lastConsultLabel
         ? `Último registro em prontuário: ${row.lastConsultLabel}`
@@ -379,8 +433,10 @@ const EXTENDED: Record<string, Omit<PatientDetail, "summary">> = {
     personal: {
       ...DETAIL_84920.personal,
       birthDate: "22/07/1985",
-      cpfMasked: "***.***.***-21",
+      cpf: "***.***.***-21",
       email: "ricardo.costa@email.com",
+      gender: "Masculino",
+      fullName: "Ricardo Costa",
     },
     evolution: DETAIL_84920.evolution.slice(0, 2),
     consults: DETAIL_84920.consults.slice(0, 2),
@@ -390,7 +446,9 @@ const EXTENDED: Record<string, Omit<PatientDetail, "summary">> = {
       ...BASE_TIMELINE_84920.map((e) => ({ ...e, id: `${e.id}-84921` })),
     ]),
     hero: {
-      ageGenderLabel: "40 anos • Masculino",
+      age: "40",
+      gender: "Masculino",
+      cpf: "***.***.***-23",
       clinicalNoteDraft:
         DETAIL_84920.evolution[0]?.text ??
         "Descreva a queixa principal, anamnese e conduta...",
@@ -405,8 +463,9 @@ const EXTENDED: Record<string, Omit<PatientDetail, "summary">> = {
     personal: {
       ...DETAIL_84920.personal,
       birthDate: "03/11/1992",
-      cpfMasked: "***.***.***-22",
+      cpf: "***.***.***-22",
       email: "beatriz.fonseca@email.com",
+      fullName: "Beatriz Fonseca",
     },
     evolution: DETAIL_84920.evolution.slice(0, 2),
     consults: DETAIL_84920.consults.slice(0, 2),
@@ -414,7 +473,9 @@ const EXTENDED: Record<string, Omit<PatientDetail, "summary">> = {
     exams: [DETAIL_84920.exams[0]!],
     timelineEvents: sortTimelineRecentFirst(BASE_TIMELINE_84920.slice(0, 4)),
     hero: {
-      ageGenderLabel: "33 anos • Feminino",
+      age: "33",
+      gender: "Feminino",
+      cpf: "***.***.***-23",
       clinicalNoteDraft:
         DETAIL_84920.evolution[0]?.text ??
         "Descreva a queixa principal, anamnese e conduta...",
@@ -430,8 +491,9 @@ const EXTENDED: Record<string, Omit<PatientDetail, "summary">> = {
     personal: {
       ...DETAIL_84920.personal,
       birthDate: "09/01/1965",
-      cpfMasked: "***.***.***-23",
+      cpf: "***.***.***-23",
       email: "luisa.m@email.com",
+      fullName: "Luisa Maria",
     },
     evolution: [],
     consults: [],
@@ -439,7 +501,9 @@ const EXTENDED: Record<string, Omit<PatientDetail, "summary">> = {
     exams: [],
     timelineEvents: [],
     hero: {
-      ageGenderLabel: "61 anos • Feminino",
+      age: "61",
+      gender: "Feminino",
+      cpf: "***.***.***-23",
       clinicalNoteDraft: "",
       clinicalNoteMeta: "Paciente inativo — sem edições recentes",
     },
